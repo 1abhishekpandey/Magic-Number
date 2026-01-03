@@ -99,12 +99,12 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 
 ---
 
-### Step 1.4: Set Up Theme
+### Step 1.4: Set Up Theme ✅
 
 **What you'll learn**: Material3 theming, custom color schemes, typography
 
 **Tasks**:
-- [ ] Create `Color.kt` with mystical purple/gold palette:
+- [x] Create `Color.kt` with mystical purple/gold palette:
   ```kotlin
   val Purple900 = Color(0xFF1A0033)  // Background
   val Purple700 = Color(0xFF4A1A7A)  // Card background
@@ -112,17 +112,21 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
   val Gold = Color(0xFFFFD700)       // Primary
   val GoldLight = Color(0xFFFFE566)  // Secondary
   ```
-- [ ] Create custom `ColorScheme` for dark theme
-- [ ] Create `Typography.kt` with app fonts
-- [ ] Create `Theme.kt` composable
-- [ ] Apply theme in `MainActivity`
+- [x] Create custom `ColorScheme` for dark theme (MysticalColorScheme)
+- [x] Create `Theme.kt` composable with status bar color handling
+- [x] Apply theme in `MainActivity` with placeholder content
+
+**Implementation notes**:
+- Dark-only theme to maintain mystical atmosphere
+- Status bar automatically matches background color
+- All Material3 color roles defined (primary, secondary, surface, etc.)
 
 **Best practices to review**:
 - Material3 color roles (primary, secondary, surface, etc.)
 - Dynamic theming vs static theming
 - Why use `CompositionLocalProvider` for theming?
 
-**Checkpoint**: App shows purple background with themed status bar
+**Checkpoint**: ✅ App shows purple background with gold "Magic Number" text
 
 ---
 

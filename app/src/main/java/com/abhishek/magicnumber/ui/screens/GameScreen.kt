@@ -165,7 +165,7 @@ private fun GameInProgressContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.80f)
-                        .aspectRatio(0.7f)
+                        .aspectRatio(0.85f)
                         .graphicsLayer {
                             // Slightly scaled down and offset
                             scaleX = 0.95f
@@ -189,7 +189,7 @@ private fun GameInProgressContent(
                     onSwipeRight = onSwipeRight,
                     modifier = Modifier
                         .fillMaxWidth(0.85f)
-                        .aspectRatio(0.7f)
+                        .aspectRatio(0.85f)
                 ) {
                     CardContent(
                         card = currentCard,
@@ -244,25 +244,11 @@ private fun CardContent(
     // 1-31: up to 16 numbers, 1-63: up to 32 numbers, 1-127: up to 64 numbers
     val numberCount = card.numbers.size
     val textSize = when {
-        numberCount <= 16 -> 18.sp
-        numberCount <= 32 -> 16.sp
-        else -> 14.sp
+        numberCount <= 16 -> 22.sp    // 4×4 grid - can be larger
+        numberCount <= 32 -> 18.sp    // 4×8 grid
+        else -> 12.sp                 // 4×16 grid - smaller for 16 rows
     }
-    val itemSize = when {
-        numberCount <= 16 -> 40.dp
-        numberCount <= 32 -> 36.dp
-        else -> 28.dp
-    }
-    val itemsPerRow = when {
-        numberCount <= 16 -> 6
-        numberCount <= 32 -> 7
-        else -> 8
-    }
-    val horizontalPadding = when {
-        numberCount <= 16 -> 8.dp
-        numberCount <= 32 -> 6.dp
-        else -> 4.dp
-    }
+    val itemsPerRow = 4  // Uniform 4 columns for all ranges
 
     Box(
         modifier = Modifier
@@ -349,7 +335,7 @@ private fun RevealContent(
             onFlipComplete = onRevealComplete,
             modifier = Modifier
                 .fillMaxWidth(0.85f)
-                .aspectRatio(0.7f),
+                .aspectRatio(0.85f),
             front = {
                 // Back of card (showing first)
                 Box(

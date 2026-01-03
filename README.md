@@ -27,7 +27,12 @@ A mystical Android app that reads your mind! Think of a number, answer a few yes
 
 ## The Secret
 
+<details>
+<summary><b>Click to reveal</b></summary>
+
 This app uses a classic mathematical magic trick based on binary numbers. Each card represents a power of 2, and your answers allow the app to calculate your number by adding up the right values. It's math disguised as magic!
+
+</details>
 
 ## Requirements
 

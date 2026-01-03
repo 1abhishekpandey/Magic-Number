@@ -207,20 +207,6 @@ private fun GameInProgressContent(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Voice control button in top-right
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            if (isVoiceAvailable) {
-                VoiceControlButton(
-                    isEnabled = isVoiceEnabled,
-                    voiceState = voiceState,
-                    onToggle = onVoiceToggle
-                )
-            }
-        }
-
         // Instruction text
         Text(
             text = "Is your number on this card?",
@@ -339,7 +325,18 @@ private fun GameInProgressContent(
             current = currentCardIndex
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Voice control button
+        if (isVoiceAvailable) {
+            VoiceControlButton(
+                isEnabled = isVoiceEnabled,
+                voiceState = voiceState,
+                onToggle = onVoiceToggle
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

@@ -103,7 +103,6 @@ fun SwipeableCard(
                         if (!isAnimatingOut) {
                             isAnimatingOut = true
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onSwipeRight()
                             coroutineScope.launch {
                                 offset.animateTo(
                                     targetValue = Offset(screenWidthPx * 1.5f, 0f),
@@ -112,6 +111,7 @@ fun SwipeableCard(
                                         stiffness = Spring.StiffnessHigh
                                     )
                                 )
+                                onSwipeRight()
                             }
                         }
                         true
@@ -120,7 +120,6 @@ fun SwipeableCard(
                         if (!isAnimatingOut) {
                             isAnimatingOut = true
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onSwipeLeft()
                             coroutineScope.launch {
                                 offset.animateTo(
                                     targetValue = Offset(-screenWidthPx * 1.5f, 0f),
@@ -129,6 +128,7 @@ fun SwipeableCard(
                                         stiffness = Spring.StiffnessHigh
                                     )
                                 )
+                                onSwipeLeft()
                             }
                         }
                         true
@@ -155,10 +155,7 @@ fun SwipeableCard(
                                     // Haptic feedback for confirmed swipe
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                    // Call callback immediately for instant transition
-                                    onSwipeRight()
-
-                                    // Animate off screen (fire and forget)
+                                    // Animate off screen first, then call callback
                                     offset.animateTo(
                                         targetValue = Offset(screenWidthPx * 1.5f, offset.value.y),
                                         animationSpec = spring(
@@ -166,6 +163,7 @@ fun SwipeableCard(
                                             stiffness = Spring.StiffnessHigh
                                         )
                                     )
+                                    onSwipeRight()
                                 }
                                 // Swiped left past threshold
                                 horizontalOffset < -swipeThresholdPx -> {
@@ -173,10 +171,7 @@ fun SwipeableCard(
                                     // Haptic feedback for confirmed swipe
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                    // Call callback immediately for instant transition
-                                    onSwipeLeft()
-
-                                    // Animate off screen (fire and forget)
+                                    // Animate off screen first, then call callback
                                     offset.animateTo(
                                         targetValue = Offset(-screenWidthPx * 1.5f, offset.value.y),
                                         animationSpec = spring(
@@ -184,6 +179,7 @@ fun SwipeableCard(
                                             stiffness = Spring.StiffnessHigh
                                         )
                                     )
+                                    onSwipeLeft()
                                 }
                                 // Threshold not reached - spring back to center
                                 else -> {

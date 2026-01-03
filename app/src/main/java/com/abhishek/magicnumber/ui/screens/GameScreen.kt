@@ -2,6 +2,9 @@ package com.abhishek.magicnumber.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -25,9 +28,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -184,12 +189,41 @@ private fun GameInProgressContent(
 
             // Current card - use key to reset SwipeableCard state for each card
             key(currentCardIndex) {
+                // Entrance animation - scale up from peek state
+                val scale = remember { Animatable(0.95f) }
+                val alpha = remember { Animatable(0.7f) }
+
+                LaunchedEffect(Unit) {
+                    // Animate to full size with a quick spring
+                    scale.animateTo(
+                        targetValue = 1f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy,
+                            stiffness = Spring.StiffnessHigh
+                        )
+                    )
+                }
+                LaunchedEffect(Unit) {
+                    alpha.animateTo(
+                        targetValue = 1f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioNoBouncy,
+                            stiffness = Spring.StiffnessHigh
+                        )
+                    )
+                }
+
                 SwipeableCard(
                     onSwipeLeft = onSwipeLeft,
                     onSwipeRight = onSwipeRight,
                     modifier = Modifier
                         .fillMaxWidth(0.85f)
                         .aspectRatio(0.85f)
+                        .graphicsLayer {
+                            scaleX = scale.value
+                            scaleY = scale.value
+                            this.alpha = alpha.value
+                        }
                 ) {
                     CardContent(
                         card = currentCard,

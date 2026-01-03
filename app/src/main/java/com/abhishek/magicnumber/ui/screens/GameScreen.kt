@@ -308,9 +308,7 @@ private fun CardContent(
     ) {
         val sortedNumbers = when (numberLayout) {
             NumberLayout.ASCENDING -> card.numbers.sorted()
-            NumberLayout.GRID -> card.numbers.sorted()
             NumberLayout.SCATTERED -> card.numbers.shuffled()
-            NumberLayout.CIRCULAR -> card.numbers.sorted()
         }
 
         // Split numbers into rows

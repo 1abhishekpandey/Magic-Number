@@ -185,9 +185,7 @@ private fun LayoutSelector(
 ) {
     val options = listOf(
         NumberLayout.ASCENDING to "Ascending",
-        NumberLayout.GRID to "Grid",
-        NumberLayout.SCATTERED to "Scattered",
-        NumberLayout.CIRCULAR to "Circular"
+        NumberLayout.SCATTERED to "Scattered"
     )
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

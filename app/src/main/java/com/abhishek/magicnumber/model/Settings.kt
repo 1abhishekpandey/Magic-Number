@@ -4,17 +4,11 @@ package com.abhishek.magicnumber.model
  * How numbers are arranged on each card.
  */
 enum class NumberLayout {
-    /** Numbers arranged in rows and columns */
-    GRID,
-
-    /** Numbers scattered artistically across the card */
-    SCATTERED,
-
     /** Numbers listed in ascending order (default) */
     ASCENDING,
 
-    /** Numbers arranged in a circle around the key number */
-    CIRCULAR
+    /** Numbers scattered randomly across the card */
+    SCATTERED
 }
 
 /**

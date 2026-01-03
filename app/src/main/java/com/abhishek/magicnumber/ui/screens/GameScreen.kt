@@ -236,7 +236,7 @@ private fun CardContent(
 ) {
     // Generate accessibility description for TalkBack
     val numbersDescription = card.numbers.sorted().joinToString(", ")
-    val cardDescription = "Card ${card.keyNumber}. Numbers on this card: $numbersDescription. " +
+    val cardDescription = "Numbers on this card: $numbersDescription. " +
         "Swipe right for Yes, swipe left for No."
 
     Box(
@@ -261,20 +261,10 @@ private fun CardContent(
             )
             .padding(16.dp)
     ) {
-        // Key number in top-left
-        Text(
-            text = card.keyNumber.toString(),
-            color = Gold,
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.TopStart)
-        )
-
         // Numbers in the center
         FlowRow(
             modifier = Modifier
-                .align(Alignment.Center)
-                .padding(top = 48.dp),
+                .align(Alignment.Center),
             horizontalArrangement = Arrangement.Center,
             verticalArrangement = Arrangement.Center,
             maxItemsInEachRow = 6

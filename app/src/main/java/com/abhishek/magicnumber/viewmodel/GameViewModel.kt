@@ -141,14 +141,13 @@ class GameViewModel(
             }
             _uiState.value = _uiState.value.copy(lastRecognizedCommand = commandText)
 
-            // Brief delay to show the recognized command before swiping
-            delay(300)
+            // Wait 1 second to show the highlighted command before swiping
+            delay(1000)
 
             val isYes = command is VoiceCommand.Yes
             onSwipe(isYes)
 
-            // Clear the command after processing
-            delay(200)
+            // Clear the highlight after swipe animation starts
             _uiState.value = _uiState.value.copy(lastRecognizedCommand = null)
         }
     }

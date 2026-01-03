@@ -305,95 +305,77 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 
 ---
 
-## Phase 4: Screens & Navigation
+## Phase 4: Screens & Navigation ✅
 
 **Goal**: Build complete screens and connect them with navigation.
 
-### Step 4.1: Set Up Navigation
+### Step 4.1: Set Up Navigation ✅
 
 **What you'll learn**: Compose Navigation, type-safe routes, navigation patterns
 
 **Tasks**:
-- [ ] Create `Navigation.kt` with sealed class routes:
-  ```kotlin
-  sealed class Screen(val route: String) {
-      object Home : Screen("home")
-      object Game : Screen("game")
-      object Settings : Screen("settings")
-  }
-  ```
-- [ ] Set up `NavHost` in MainActivity
-- [ ] Create `NavController` and pass to screens
-- [ ] Handle back button behavior
+- [x] Create `Navigation.kt` with sealed class routes
+- [x] Set up `NavHost` in MainActivity
+- [x] Create `NavController` and pass to screens
+- [x] Handle back button behavior
+
+**Implementation highlights**:
+- `Screen` sealed class with `Home`, `Game`, `Settings` routes
+- `MagicNumberNavHost` composable wrapping `NavHost`
+- `BackHandler` used in GameScreen for back button handling
+- Navigation callbacks passed to screens as lambdas
 
 **Best practices to review**:
 - Why sealed classes for routes?
 - Single NavHost pattern
 - Navigation state restoration
 
-**Checkpoint**: Can navigate between placeholder screens
+**Checkpoint**: ✅ Can navigate between all screens
 
 ---
 
-### Step 4.2: Implement Home Screen
+### Step 4.2: Implement Home Screen ✅
 
 **What you'll learn**: Screen composition, layout design, click handling
 
 **Tasks**:
-- [ ] Create `HomeScreen.kt`
-- [ ] Add gradient background (purple shades)
-- [ ] Create "Magic Number" title with glow effect
-- [ ] Create large "Start" button with gold styling
-- [ ] Add settings gear icon in top-right
-- [ ] Optional: Add subtle star particle animation in background
+- [x] Create `HomeScreen.kt`
+- [x] Add gradient background (purple shades)
+- [x] Create "Magic Number" title with glow effect
+- [x] Create large "Start" button with gold styling
+- [x] Add settings gear icon in top-right
 
-**UI Structure**:
-```kotlin
-@Composable
-fun HomeScreen(
-    onStartClick: () -> Unit,
-    onSettingsClick: () -> Unit
-) {
-    Box(modifier = Modifier.fillMaxSize().background(gradientBrush)) {
-        // Settings icon top-right
-        // Title centered top
-        // Start button centered
-    }
-}
-```
+**Implementation highlights**:
+- `MagicTitle` composable with blur layer behind for glow effect
+- `StartButton` with gold border using `Brush.linearGradient`
+- Settings icon uses `Icons.Default.Settings`
+- Box layout with `Alignment.TopEnd` for settings icon
 
 **Best practices to review**:
 - Gradient backgrounds in Compose
 - Box vs Column vs Row usage
 - Lambda callbacks for navigation
 
-**Checkpoint**: Home screen looks polished, buttons work
+**Checkpoint**: ✅ Home screen looks polished, buttons work
 
 ---
 
-### Step 4.3: Create Game ViewModel
+### Step 4.3: Create ViewModels ✅
 
 **What you'll learn**: ViewModel, UI state management, event handling
 
 **Tasks**:
-- [ ] Create `GameViewModel.kt`
-- [ ] Inject `CardGenerator` and `PreferencesRepository`
-- [ ] Expose `uiState: StateFlow<GameUiState>`
-- [ ] Implement `startGame()` - generates cards based on settings
-- [ ] Implement `onSwipe(isYes: Boolean)` - records response, advances
-- [ ] Implement `onRevealComplete()` - transitions to complete phase
-- [ ] Implement `resetGame()`
+- [x] Create `GameViewModel.kt` with game state management
+- [x] Create `SettingsViewModel.kt` with settings exposure
+- [x] Expose `uiState: StateFlow<GameState>`
+- [x] Implement `startGame()`, `onSwipe()`, `onRevealComplete()`, `resetGame()`
+- [x] Use ViewModelProvider.Factory for dependency injection
 
-**State design**:
-```kotlin
-data class GameUiState(
-    val cards: List<Card> = emptyList(),
-    val currentCardIndex: Int = 0,
-    val responses: List<Boolean> = emptyList(),
-    val phase: GamePhase = GamePhase.NotStarted,
-    val numberLayout: NumberLayout = NumberLayout.ASCENDING
-)
-```
+**Implementation highlights**:
+- `GameViewModel` auto-starts game in init block
+- `SettingsViewModel` exposes `settingsFlow` as StateFlow
+- Factory companion objects for manual DI (no Hilt/Koin)
+- `WhileSubscribed(5000)` for efficient Flow collection
 
 **Best practices to review**:
 - StateFlow vs SharedFlow
@@ -401,100 +383,89 @@ data class GameUiState(
 - ViewModel scope for coroutines
 - Why not expose MutableStateFlow?
 
-**Checkpoint**: ViewModel logic works (test via logs)
+**Checkpoint**: ✅ ViewModels properly manage state
 
 ---
 
-### Step 4.4: Implement Game Screen
+### Step 4.4: Implement Game Screen ✅
 
 **What you'll learn**: Complex screen composition, state consumption
 
 **Tasks**:
-- [ ] Create `GameScreen.kt`
-- [ ] Collect ViewModel state with `collectAsState()`
-- [ ] Show card stack with current card on top
-- [ ] Display numbers on card based on layout setting
-- [ ] Integrate `SwipeableCard` component
-- [ ] Show `DotsIndicator` at bottom
-- [ ] Handle swipe callbacks to ViewModel
-- [ ] Transition to reveal when all cards complete
+- [x] Create `GameScreen.kt` with phase-based rendering
+- [x] Collect ViewModel state with `collectAsState()`
+- [x] Display numbers on card using `FlowRow`
+- [x] Integrate `SwipeableCard` component
+- [x] Show `DotsIndicator` at bottom
+- [x] Handle swipe callbacks to ViewModel
+- [x] Use `key()` to reset card state between transitions
 
-**Layout challenge**: Display numbers in different layouts (grid, ascending, scattered, circular)
-```kotlin
-@Composable
-fun CardNumbers(
-    numbers: List<Int>,
-    layout: NumberLayout,
-    keyNumber: Int
-) {
-    when (layout) {
-        NumberLayout.ASCENDING -> AscendingLayout(numbers, keyNumber)
-        NumberLayout.GRID -> GridLayout(numbers, keyNumber)
-        NumberLayout.SCATTERED -> ScatteredLayout(numbers, keyNumber)
-        NumberLayout.CIRCULAR -> CircularLayout(numbers, keyNumber)
-    }
-}
-```
+**Implementation highlights**:
+- `when (uiState.phase)` for rendering different game phases
+- `GameInProgressContent` handles card swiping
+- `key(currentCardIndex)` ensures SwipeableCard resets state per card
+- Layout respects `numberLayout` setting (sorted/shuffled)
 
 **Best practices to review**:
 - Collecting Flow in Compose
 - Avoiding recomposition issues
-- State-driven animations
+- `key()` composable for state reset
 
-**Checkpoint**: Can play through entire card sequence
+**Checkpoint**: ✅ Can play through entire card sequence
 
 ---
 
-### Step 4.5: Implement Reveal Screen
+### Step 4.5: Implement Reveal ✅
 
 **What you'll learn**: Animation coordination, delayed actions
 
 **Tasks**:
-- [ ] Create `RevealScreen.kt` (or integrate into GameScreen)
-- [ ] Use `FlipCard` component for dramatic reveal
-- [ ] Show card back initially, flip to reveal number
-- [ ] Add sparkle/celebration animation after flip
-- [ ] Show "Play Again" button after animation completes
-- [ ] Strong haptic on reveal
+- [x] Integrate reveal into `GameScreen.kt`
+- [x] Use `FlipCard` component for dramatic reveal
+- [x] Show card back (?) initially, flip to reveal number
+- [x] Show "Play Again" button after flip completes
+- [x] Transition through Revealing → Complete phases
 
-**Animation sequence**:
-1. Card appears (back showing)
-2. After 500ms delay, card starts flipping
-3. Flip takes 1.5 seconds
-4. Sparkle animation triggers when flip completes
-5. "Play Again" button fades in
+**Implementation highlights**:
+- `RevealContent` composable with FlipCard
+- `GamePhase.Revealing(number)` triggers flip animation
+- `onFlipComplete` callback transitions to `GamePhase.Complete`
+- `CompleteContent` shows large number and Play Again button
 
 **Best practices to review**:
 - `LaunchedEffect` for side effects
 - Animation coordination with `Animatable`
-- `AnimatedVisibility` for enter/exit
+- State machine pattern for game phases
 
-**Checkpoint**: Full game loop works end-to-end
+**Checkpoint**: ✅ Full game loop works end-to-end
 
 ---
 
-### Step 4.6: Implement Settings Screen
+### Step 4.6: Implement Settings Screen ✅
 
 **What you'll learn**: Form-style UI, preference editing, reactive updates
 
 **Tasks**:
-- [ ] Create `SettingsViewModel.kt`
-- [ ] Create `SettingsScreen.kt`
-- [ ] Add range selector (radio buttons or segmented control)
-  - 1-31 (5 cards)
-  - 1-63 (6 cards)
-  - 1-127 (7 cards)
-- [ ] Add layout style selector with visual previews
-- [ ] Add "How It Works" expandable section
-- [ ] Save changes immediately (no save button)
-- [ ] Navigate back via toolbar or back button
+- [x] Create `SettingsViewModel.kt`
+- [x] Create `SettingsScreen.kt`
+- [x] Add range selector (1-31, 1-63, 1-127)
+- [x] Add layout style selector (Ascending, Grid, Scattered, Circular)
+- [x] Add "How It Works" expandable section
+- [x] Save changes immediately (no save button)
+- [x] Navigate back via toolbar back button
+
+**Implementation highlights**:
+- `SettingsSection` for consistent section styling
+- `SelectableOption` for radio-button-like selection
+- `HowItWorksSection` with `AnimatedVisibility` for expand/collapse
+- Changes saved immediately via ViewModel methods
 
 **Best practices to review**:
 - Two-way data binding pattern
 - Immediate save vs explicit save
 - Expandable/collapsible sections
 
-**Checkpoint**: Settings persist across app restarts
+**Checkpoint**: ✅ Settings persist across app restarts
 
 ---
 

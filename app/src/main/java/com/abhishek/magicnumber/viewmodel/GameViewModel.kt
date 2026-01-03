@@ -1,7 +1,10 @@
 package com.abhishek.magicnumber.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.abhishek.magicnumber.data.CardGenerator
 import com.abhishek.magicnumber.data.PreferencesRepository
 import com.abhishek.magicnumber.model.GamePhase
@@ -20,6 +23,11 @@ import kotlinx.coroutines.launch
 class GameViewModel(
     private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
+
+    init {
+        // Auto-start game when ViewModel is created
+        startGame()
+    }
 
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
@@ -87,5 +95,20 @@ class GameViewModel(
      */
     fun resetGame() {
         _uiState.value = GameState()
+    }
+
+    companion object {
+        /**
+         * Factory for creating GameViewModel with dependencies.
+         */
+        fun factory(context: Context): ViewModelProvider.Factory {
+            return object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    val repository = PreferencesRepository(context.applicationContext)
+                    return GameViewModel(repository) as T
+                }
+            }
+        }
     }
 }

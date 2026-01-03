@@ -21,6 +21,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -71,6 +74,9 @@ fun SwipeableCard(
     val offset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
     val coroutineScope = rememberCoroutineScope()
 
+    // Track if animation is in progress to prevent rapid swipes
+    var isAnimatingOut by remember { mutableStateOf(false) }
+
     // Track if we've crossed threshold to trigger haptic only once
     var hasTriggeredThresholdHaptic by remember { mutableStateOf(false) }
 
@@ -90,11 +96,53 @@ fun SwipeableCard(
 
     Box(
         modifier = modifier
+            .semantics {
+                // Custom accessibility actions for TalkBack users
+                customActions = listOf(
+                    CustomAccessibilityAction("Answer Yes") {
+                        if (!isAnimatingOut) {
+                            coroutineScope.launch {
+                                isAnimatingOut = true
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                offset.animateTo(
+                                    targetValue = Offset(screenWidthPx * 1.5f, 0f),
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessMedium
+                                    )
+                                )
+                                onSwipeRight()
+                            }
+                        }
+                        true
+                    },
+                    CustomAccessibilityAction("Answer No") {
+                        if (!isAnimatingOut) {
+                            coroutineScope.launch {
+                                isAnimatingOut = true
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                offset.animateTo(
+                                    targetValue = Offset(-screenWidthPx * 1.5f, 0f),
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessMedium
+                                    )
+                                )
+                                onSwipeLeft()
+                            }
+                        }
+                        true
+                    }
+                )
+            }
             .offset { IntOffset(offset.value.x.roundToInt(), offset.value.y.roundToInt()) }
             .graphicsLayer {
                 rotationZ = rotation
             }
-            .pointerInput(Unit) {
+            .pointerInput(isAnimatingOut) {
+                // Skip gesture detection if already animating out
+                if (isAnimatingOut) return@pointerInput
+
                 detectDragGestures(
                     onDragEnd = {
                         coroutineScope.launch {
@@ -103,6 +151,7 @@ fun SwipeableCard(
                             when {
                                 // Swiped right past threshold
                                 horizontalOffset > swipeThresholdPx -> {
+                                    isAnimatingOut = true
                                     // Haptic feedback for confirmed swipe
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
 
@@ -118,6 +167,7 @@ fun SwipeableCard(
                                 }
                                 // Swiped left past threshold
                                 horizontalOffset < -swipeThresholdPx -> {
+                                    isAnimatingOut = true
                                     // Haptic feedback for confirmed swipe
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
 

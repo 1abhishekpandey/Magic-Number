@@ -7,48 +7,29 @@
 
     <!-- Card shape with rounded corners -->
     <path
-        android:fillColor="#FF4A1A7A"
+        android:fillColor="#000000"
         android:pathData="M34,28 L74,28 Q80,28 80,34 L80,74 Q80,80 74,80 L34,80 Q28,80 28,74 L28,34 Q28,28 34,28 Z"/>
 
-    <!-- Card border (gold) -->
+    <!-- Question mark cutout (transparent) -->
     <path
-        android:strokeColor="#FFFFD700"
-        android:strokeWidth="2"
-        android:fillColor="#00000000"
-        android:pathData="M34,28 L74,28 Q80,28 80,34 L80,74 Q80,80 74,80 L34,80 Q28,80 28,74 L28,34 Q28,28 34,28 Z"/>
-
-    <!-- Question mark (gold) - represents the magic/mystery -->
-    <path
-        android:fillColor="#FFFFD700"
+        android:fillColor="#FFFFFF"
         android:pathData="M54,42 C54,42 48,42 48,48 C48,51 50,52 52,53 C52,55 52,57 54,57 C56,57 56,55 56,53 C58,52 60,51 60,48 C60,42 54,42 54,42 Z"/>
     <path
-        android:fillColor="#FFFFD700"
+        android:fillColor="#FFFFFF"
         android:pathData="M54,62 m-3,0 a3,3 0,1 1,6 0 a3,3 0,1 1,-6 0"/>
 
-    <!-- Sparkle stars around the card -->
-    <!-- Top-left sparkle -->
+    <!-- Sparkle stars -->
     <path
-        android:fillColor="#FFFFD700"
+        android:fillColor="#000000"
         android:pathData="M24,24 L25,22 L26,24 L28,25 L26,26 L25,28 L24,26 L22,25 Z"/>
-
-    <!-- Top-right sparkle -->
     <path
-        android:fillColor="#FFFFD700"
+        android:fillColor="#000000"
         android:pathData="M84,22 L85,20 L86,22 L88,23 L86,24 L85,26 L84,24 L82,23 Z"/>
-
-    <!-- Bottom-left sparkle -->
     <path
-        android:fillColor="#FFFFE566"
+        android:fillColor="#000000"
         android:pathData="M22,82 L23,80 L24,82 L26,83 L24,84 L23,86 L22,84 L20,83 Z"/>
-
-    <!-- Bottom-right sparkle -->
     <path
-        android:fillColor="#FFFFE566"
+        android:fillColor="#000000"
         android:pathData="M86,84 L87,82 L88,84 L90,85 L88,86 L87,88 L86,86 L84,85 Z"/>
-
-    <!-- Small accent sparkle -->
-    <path
-        android:fillColor="#FFFFD700"
-        android:pathData="M40,20 L40.5,19 L41,20 L42,20.5 L41,21 L40.5,22 L40,21 L39,20.5 Z"/>
 
 </vector>

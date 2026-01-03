@@ -31,7 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -131,6 +134,7 @@ private fun GameInProgressContent(
     onSwipeRight: () -> Unit
 ) {
     val currentCard = cards.getOrNull(currentCardIndex) ?: return
+    val nextCard = cards.getOrNull(currentCardIndex + 1)
 
     Column(
         modifier = Modifier
@@ -148,13 +152,36 @@ private fun GameInProgressContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Card - use key to reset SwipeableCard state for each card
+        // Card stack - shows peek of next card behind current
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
+            // Next card peek (behind current card)
+            if (nextCard != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.80f)
+                        .aspectRatio(0.7f)
+                        .graphicsLayer {
+                            // Slightly scaled down and offset
+                            scaleX = 0.95f
+                            scaleY = 0.95f
+                            translationY = 16.dp.toPx()
+                            alpha = 0.6f
+                        }
+                ) {
+                    CardContent(
+                        card = nextCard,
+                        numberLayout = numberLayout,
+                        showShadow = false
+                    )
+                }
+            }
+
+            // Current card - use key to reset SwipeableCard state for each card
             key(currentCardIndex) {
                 SwipeableCard(
                     onSwipeLeft = onSwipeLeft,
@@ -165,7 +192,8 @@ private fun GameInProgressContent(
                 ) {
                     CardContent(
                         card = currentCard,
-                        numberLayout = numberLayout
+                        numberLayout = numberLayout,
+                        showShadow = true
                     )
                 }
             }
@@ -194,16 +222,36 @@ private fun GameInProgressContent(
 
 /**
  * Card content with numbers displayed.
+ *
+ * @param card The card data to display
+ * @param numberLayout How to arrange the numbers
+ * @param showShadow Whether to show a drop shadow (for depth effect)
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CardContent(
     card: Card,
-    numberLayout: NumberLayout
+    numberLayout: NumberLayout,
+    showShadow: Boolean = true
 ) {
+    // Generate accessibility description for TalkBack
+    val numbersDescription = card.numbers.sorted().joinToString(", ")
+    val cardDescription = "Card ${card.keyNumber}. Numbers on this card: $numbersDescription. " +
+        "Swipe right for Yes, swipe left for No."
+
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .semantics {
+                contentDescription = cardDescription
+            }
+            .graphicsLayer {
+                if (showShadow) {
+                    shadowElevation = 16.dp.toPx()
+                    shape = RoundedCornerShape(16.dp)
+                    clip = false
+                }
+            }
             .clip(RoundedCornerShape(16.dp))
             .background(Purple700)
             .border(
@@ -327,6 +375,17 @@ private fun CompleteContent(
     number: Int,
     onPlayAgain: () -> Unit
 ) {
+    // Special message for edge cases
+    val headerText = when (number) {
+        0 -> "You said NO to all cards!"
+        else -> "Your number is"
+    }
+
+    val subtitleText = when (number) {
+        0 -> "That means your number was..."
+        else -> null
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -335,10 +394,20 @@ private fun CompleteContent(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Your number is",
+            text = headerText,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-            fontSize = 20.sp
+            fontSize = 20.sp,
+            textAlign = TextAlign.Center
         )
+
+        if (subtitleText != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = subtitleText,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                fontSize = 16.sp
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

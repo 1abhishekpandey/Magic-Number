@@ -1,5 +1,7 @@
 package com.abhishek.magicnumber.model
 
+import com.abhishek.magicnumber.voice.VoiceRecognitionState
+
 /**
  * Represents the current phase of the game.
  */
@@ -34,5 +36,8 @@ data class GameState(
     val currentCardIndex: Int = 0,
     val responses: List<Boolean> = emptyList(),
     val phase: GamePhase = GamePhase.NotStarted,
-    val numberLayout: NumberLayout = NumberLayout.ASCENDING
+    val numberLayout: NumberLayout = NumberLayout.ASCENDING,
+    val isVoiceEnabled: Boolean = false,
+    val voiceState: VoiceRecognitionState = VoiceRecognitionState.Idle,
+    val lastRecognizedCommand: String? = null
 )

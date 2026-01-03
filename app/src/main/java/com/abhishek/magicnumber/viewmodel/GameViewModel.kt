@@ -4,11 +4,14 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.abhishek.magicnumber.data.CardGenerator
 import com.abhishek.magicnumber.data.PreferencesRepository
 import com.abhishek.magicnumber.model.GamePhase
 import com.abhishek.magicnumber.model.GameState
+import com.abhishek.magicnumber.voice.VoiceCommand
+import com.abhishek.magicnumber.voice.VoiceRecognitionManager
+import com.abhishek.magicnumber.voice.VoiceRecognitionState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,16 +24,18 @@ import kotlinx.coroutines.launch
  * Manages game state and handles user interactions during gameplay.
  */
 class GameViewModel(
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: PreferencesRepository,
+    private val voiceRecognitionManager: VoiceRecognitionManager
 ) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(GameState())
+    val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
     init {
         // Auto-start game when ViewModel is created
         startGame()
+        observeVoiceState()
     }
-
-    private val _uiState = MutableStateFlow(GameState())
-    val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
     /**
      * Starts a new game by generating cards based on current settings.
@@ -109,6 +114,83 @@ class GameViewModel(
         _uiState.value = GameState()
     }
 
+    /**
+     * Observes voice recognition state and triggers swipes on voice commands.
+     */
+    private fun observeVoiceState() {
+        viewModelScope.launch {
+            voiceRecognitionManager.state.collect { voiceState ->
+                _uiState.value = _uiState.value.copy(voiceState = voiceState)
+
+                if (voiceState is VoiceRecognitionState.CommandRecognized) {
+                    handleVoiceCommand(voiceState.command)
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles a recognized voice command by triggering the appropriate swipe.
+     */
+    private fun handleVoiceCommand(command: VoiceCommand) {
+        viewModelScope.launch {
+            val commandText = when (command) {
+                is VoiceCommand.Yes -> "Yes"
+                is VoiceCommand.No -> "No"
+            }
+            _uiState.value = _uiState.value.copy(lastRecognizedCommand = commandText)
+
+            // Brief delay to show the recognized command before swiping
+            delay(300)
+
+            val isYes = command is VoiceCommand.Yes
+            onSwipe(isYes)
+
+            // Clear the command after processing
+            delay(200)
+            _uiState.value = _uiState.value.copy(lastRecognizedCommand = null)
+        }
+    }
+
+    /**
+     * Toggles voice control on/off.
+     */
+    fun toggleVoiceControl() {
+        val current = _uiState.value
+        val newEnabled = !current.isVoiceEnabled
+
+        _uiState.value = current.copy(isVoiceEnabled = newEnabled)
+
+        if (newEnabled) {
+            voiceRecognitionManager.startListening()
+        } else {
+            voiceRecognitionManager.stopListening()
+        }
+    }
+
+    /**
+     * Checks if voice recognition is available on this device.
+     */
+    fun isVoiceRecognitionAvailable(): Boolean {
+        return voiceRecognitionManager.isAvailable()
+    }
+
+    /**
+     * Stops voice control and resets voice state.
+     */
+    fun stopVoiceControl() {
+        voiceRecognitionManager.stopListening()
+        _uiState.value = _uiState.value.copy(
+            isVoiceEnabled = false,
+            lastRecognizedCommand = null
+        )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        voiceRecognitionManager.destroy()
+    }
+
     companion object {
         /**
          * Factory for creating GameViewModel with dependencies.
@@ -118,7 +200,8 @@ class GameViewModel(
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     val repository = PreferencesRepository(context.applicationContext)
-                    return GameViewModel(repository) as T
+                    val voiceManager = VoiceRecognitionManager(context.applicationContext)
+                    return GameViewModel(repository, voiceManager) as T
                 }
             }
         }

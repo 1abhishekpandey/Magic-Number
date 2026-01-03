@@ -1,6 +1,9 @@
 package com.abhishek.magicnumber.ui.screens
 
+import android.Manifest
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -36,6 +39,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -66,7 +70,10 @@ import com.abhishek.magicnumber.ui.theme.Gold
 import com.abhishek.magicnumber.ui.theme.Purple700
 import com.abhishek.magicnumber.ui.theme.Purple800
 import com.abhishek.magicnumber.ui.theme.Purple900
+import com.abhishek.magicnumber.ui.components.VoiceCommandFeedback
+import com.abhishek.magicnumber.ui.components.VoiceControlButton
 import com.abhishek.magicnumber.viewmodel.GameViewModel
+import com.abhishek.magicnumber.voice.VoiceRecognitionState
 
 /**
  * Game screen where user swipes through cards.
@@ -85,8 +92,27 @@ fun GameScreen(
     val viewModel: GameViewModel = viewModel(factory = GameViewModel.factory(context))
     val uiState by viewModel.uiState.collectAsState()
 
+    // Permission launcher for RECORD_AUDIO
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.toggleVoiceControl()
+        }
+    }
+
+    // Stop voice control when leaving screen
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopVoiceControl()
+        }
+    }
+
     // Handle back button
-    BackHandler { onBackClick() }
+    BackHandler {
+        viewModel.stopVoiceControl()
+        onBackClick()
+    }
 
     Box(
         modifier = modifier
@@ -115,7 +141,18 @@ fun GameScreen(
                     currentCardIndex = uiState.currentCardIndex,
                     numberLayout = uiState.numberLayout,
                     onSwipeLeft = { viewModel.onSwipe(false) },
-                    onSwipeRight = { viewModel.onSwipe(true) }
+                    onSwipeRight = { viewModel.onSwipe(true) },
+                    isVoiceEnabled = uiState.isVoiceEnabled,
+                    voiceState = uiState.voiceState,
+                    lastRecognizedCommand = uiState.lastRecognizedCommand,
+                    onVoiceToggle = {
+                        if (!uiState.isVoiceEnabled) {
+                            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                        } else {
+                            viewModel.toggleVoiceControl()
+                        }
+                    },
+                    isVoiceAvailable = viewModel.isVoiceRecognitionAvailable()
                 )
             }
 
@@ -154,7 +191,12 @@ private fun GameInProgressContent(
     currentCardIndex: Int,
     numberLayout: NumberLayout,
     onSwipeLeft: () -> Unit,
-    onSwipeRight: () -> Unit
+    onSwipeRight: () -> Unit,
+    isVoiceEnabled: Boolean,
+    voiceState: VoiceRecognitionState,
+    lastRecognizedCommand: String?,
+    onVoiceToggle: () -> Unit,
+    isVoiceAvailable: Boolean
 ) {
     val currentCard = cards.getOrNull(currentCardIndex) ?: return
     val nextCard = cards.getOrNull(currentCardIndex + 1)
@@ -165,6 +207,20 @@ private fun GameInProgressContent(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Voice control button in top-right
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            if (isVoiceAvailable) {
+                VoiceControlButton(
+                    isEnabled = isVoiceEnabled,
+                    voiceState = voiceState,
+                    onToggle = onVoiceToggle
+                )
+            }
+        }
+
         // Instruction text
         Text(
             text = "Is your number on this card?",
@@ -246,6 +302,21 @@ private fun GameInProgressContent(
                         card = currentCard,
                         numberLayout = numberLayout,
                         showShadow = true
+                    )
+                }
+            }
+
+            // Voice command feedback overlay
+            if (lastRecognizedCommand != null) {
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier.align(Alignment.TopCenter)
+                ) {
+                    VoiceCommandFeedback(
+                        command = lastRecognizedCommand,
+                        modifier = Modifier.padding(top = 16.dp)
                     )
                 }
             }

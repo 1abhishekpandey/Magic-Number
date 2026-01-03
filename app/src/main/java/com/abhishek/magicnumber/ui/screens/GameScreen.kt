@@ -3,14 +3,21 @@ package com.abhishek.magicnumber.ui.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -20,6 +27,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +40,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -106,6 +116,13 @@ fun GameScreen(
                     numberLayout = uiState.numberLayout,
                     onSwipeLeft = { viewModel.onSwipe(false) },
                     onSwipeRight = { viewModel.onSwipe(true) }
+                )
+            }
+
+            is GamePhase.Calculating -> {
+                // "Reading your mind" animation
+                CalculatingContent(
+                    onRevealClick = { viewModel.onRevealClick() }
                 )
             }
 
@@ -348,6 +365,206 @@ private fun CardContent(
             }
         }
     }
+}
+
+/**
+ * "Reading your mind" calculating animation content.
+ */
+@Composable
+private fun CalculatingContent(
+    onRevealClick: () -> Unit
+) {
+    // Track whether the 2-second animation period is complete
+    var showRevealButton by remember { mutableStateOf(false) }
+
+    // Wait 2 seconds before showing the Reveal button
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(2000)
+        showRevealButton = true
+    }
+
+    // Only animate while waiting for button to appear
+    val infiniteTransition = rememberInfiniteTransition(label = "stars")
+
+    // Multiple rotation animations at different speeds for stars
+    val rotation1 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation1"
+    )
+    val rotation2 by infiniteTransition.animateFloat(
+        initialValue = 360f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(5000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation2"
+    )
+    val rotation3 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(8000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation3"
+    )
+
+    // Pulsing animation for center (stops when button appears)
+    val pulse by infiniteTransition.animateFloat(
+        initialValue = 0.9f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse"
+    )
+
+    // Alpha animation for text
+    val textAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.6f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "textAlpha"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Rotating stars container
+        Box(
+            modifier = Modifier.size(250.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            // When button appears, stop rotations at current position
+            val finalRotation1 = if (showRevealButton) rotation1 else rotation1
+            val finalRotation2 = if (showRevealButton) rotation2 else rotation2
+            val finalRotation3 = if (showRevealButton) rotation3 else rotation3
+
+            // Outer ring of stars (slowest)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer { rotationZ = if (showRevealButton) 0f else finalRotation3 }
+            ) {
+                StarAt(0.5f, 0f, "✦")      // Top
+                StarAt(1f, 0.5f, "★")       // Right
+                StarAt(0.5f, 1f, "✧")       // Bottom
+                StarAt(0f, 0.5f, "✦")       // Left
+            }
+
+            // Middle ring of stars (medium speed, counter-rotating)
+            Box(
+                modifier = Modifier
+                    .size(180.dp)
+                    .graphicsLayer { rotationZ = if (showRevealButton) 0f else finalRotation2 }
+            ) {
+                StarAt(0.85f, 0.15f, "★")   // Top-right
+                StarAt(0.85f, 0.85f, "✧")   // Bottom-right
+                StarAt(0.15f, 0.85f, "✦")   // Bottom-left
+                StarAt(0.15f, 0.15f, "★")   // Top-left
+            }
+
+            // Inner ring of stars (fastest)
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .graphicsLayer { rotationZ = if (showRevealButton) 0f else finalRotation1 }
+            ) {
+                StarAt(0.5f, 0.1f, "✧")
+                StarAt(0.9f, 0.5f, "✦")
+                StarAt(0.5f, 0.9f, "★")
+                StarAt(0.1f, 0.5f, "✧")
+            }
+
+            // Center "?" with pulsing effect (stops when button appears)
+            Text(
+                text = "?",
+                color = Gold,
+                fontSize = 64.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.graphicsLayer {
+                    val scale = if (showRevealButton) 1f else pulse
+                    scaleX = scale
+                    scaleY = scale
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // "Reading your mind..." text (stops animating when button appears)
+        Text(
+            text = "Reading your mind...",
+            color = Gold.copy(alpha = if (showRevealButton) 1f else textAlpha),
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Medium
+        )
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        // Reveal button - only shown after 2 seconds
+        AnimatedVisibility(
+            visible = showRevealButton,
+            enter = fadeIn()
+        ) {
+            Button(
+                onClick = onRevealClick,
+                modifier = Modifier.size(width = 200.dp, height = 56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Purple700,
+                    contentColor = Gold
+                ),
+                shape = RoundedCornerShape(28.dp)
+            ) {
+                Text(
+                    text = "Reveal",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        // Placeholder to maintain layout before button appears
+        if (!showRevealButton) {
+            Spacer(modifier = Modifier.height(56.dp))
+        }
+    }
+}
+
+/**
+ * Helper composable to position a star at relative coordinates within parent.
+ */
+@Composable
+private fun BoxScope.StarAt(
+    xFraction: Float,
+    yFraction: Float,
+    symbol: String
+) {
+    Text(
+        text = symbol,
+        color = Gold,
+        fontSize = 24.sp,
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .offset(
+                x = (xFraction * 220).dp,
+                y = (yFraction * 220).dp
+            )
+    )
 }
 
 /**

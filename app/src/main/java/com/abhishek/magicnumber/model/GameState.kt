@@ -10,6 +10,9 @@ sealed class GamePhase {
     /** User is swiping through cards */
     data object InProgress : GamePhase()
 
+    /** "Reading your mind" animation before reveal */
+    data class Calculating(val number: Int) : GamePhase()
+
     /** Card flip animation is playing to reveal the number */
     data class Revealing(val number: Int) : GamePhase()
 

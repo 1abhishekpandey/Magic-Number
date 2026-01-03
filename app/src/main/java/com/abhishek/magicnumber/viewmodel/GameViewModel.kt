@@ -63,11 +63,11 @@ class GameViewModel(
         val nextIndex = current.currentCardIndex + 1
 
         _uiState.value = if (nextIndex >= current.cards.size) {
-            // All cards shown, calculate and reveal
+            // All cards shown, calculate and show calculating animation
             val result = CardGenerator.calculateResult(newResponses, current.cards)
             current.copy(
                 responses = newResponses,
-                phase = GamePhase.Revealing(result)
+                phase = GamePhase.Calculating(result)
             )
         } else {
             // Move to next card
@@ -76,6 +76,18 @@ class GameViewModel(
                 responses = newResponses
             )
         }
+    }
+
+    /**
+     * Called when user clicks the Reveal button.
+     */
+    fun onRevealClick() {
+        val current = _uiState.value
+        val calculatingPhase = current.phase as? GamePhase.Calculating ?: return
+
+        _uiState.value = current.copy(
+            phase = GamePhase.Revealing(calculatingPhase.number)
+        )
     }
 
     /**

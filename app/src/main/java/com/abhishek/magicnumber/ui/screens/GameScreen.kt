@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -239,6 +240,30 @@ private fun CardContent(
     val cardDescription = "Numbers on this card: $numbersDescription. " +
         "Swipe right for Yes, swipe left for No."
 
+    // Dynamic sizing based on number count for different ranges
+    // 1-31: up to 16 numbers, 1-63: up to 32 numbers, 1-127: up to 64 numbers
+    val numberCount = card.numbers.size
+    val textSize = when {
+        numberCount <= 16 -> 18.sp
+        numberCount <= 32 -> 16.sp
+        else -> 14.sp
+    }
+    val itemSize = when {
+        numberCount <= 16 -> 40.dp
+        numberCount <= 32 -> 36.dp
+        else -> 28.dp
+    }
+    val itemsPerRow = when {
+        numberCount <= 16 -> 6
+        numberCount <= 32 -> 7
+        else -> 8
+    }
+    val horizontalPadding = when {
+        numberCount <= 16 -> 8.dp
+        numberCount <= 32 -> 6.dp
+        else -> 4.dp
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -259,33 +284,49 @@ private fun CardContent(
                 brush = Brush.linearGradient(listOf(Gold.copy(alpha = 0.6f), Gold.copy(alpha = 0.3f))),
                 shape = RoundedCornerShape(16.dp)
             )
-            .padding(16.dp)
+            .padding(12.dp)
     ) {
-        // Numbers in the center
-        FlowRow(
-            modifier = Modifier
-                .align(Alignment.Center),
-            horizontalArrangement = Arrangement.Center,
-            verticalArrangement = Arrangement.Center,
-            maxItemsInEachRow = 6
-        ) {
-            val sortedNumbers = when (numberLayout) {
-                NumberLayout.ASCENDING -> card.numbers.sorted()
-                NumberLayout.GRID -> card.numbers.sorted()
-                NumberLayout.SCATTERED -> card.numbers.shuffled()
-                NumberLayout.CIRCULAR -> card.numbers.sorted()
-            }
+        val sortedNumbers = when (numberLayout) {
+            NumberLayout.ASCENDING -> card.numbers.sorted()
+            NumberLayout.GRID -> card.numbers.sorted()
+            NumberLayout.SCATTERED -> card.numbers.shuffled()
+            NumberLayout.CIRCULAR -> card.numbers.sorted()
+        }
 
-            sortedNumbers.forEach { number ->
-                Text(
-                    text = number.toString(),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 18.sp,
-                    textAlign = TextAlign.Center,
+        // Split numbers into rows
+        val rows = sortedNumbers.chunked(itemsPerRow)
+
+        // Grid that fills the entire card
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ) {
+            rows.forEach { rowNumbers ->
+                Row(
                     modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .size(40.dp)
-                )
+                        .fillMaxWidth()
+                        .weight(1f),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    rowNumbers.forEach { number ->
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = number.toString(),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = textSize,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    // Fill remaining columns if row is not full
+                    repeat(itemsPerRow - rowNumbers.size) {
+                        Box(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
     }

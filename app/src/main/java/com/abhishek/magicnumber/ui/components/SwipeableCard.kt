@@ -101,34 +101,34 @@ fun SwipeableCard(
                 customActions = listOf(
                     CustomAccessibilityAction("Answer Yes") {
                         if (!isAnimatingOut) {
+                            isAnimatingOut = true
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onSwipeRight()
                             coroutineScope.launch {
-                                isAnimatingOut = true
-                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                 offset.animateTo(
                                     targetValue = Offset(screenWidthPx * 1.5f, 0f),
                                     animationSpec = spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessMedium
+                                        dampingRatio = Spring.DampingRatioNoBouncy,
+                                        stiffness = Spring.StiffnessHigh
                                     )
                                 )
-                                onSwipeRight()
                             }
                         }
                         true
                     },
                     CustomAccessibilityAction("Answer No") {
                         if (!isAnimatingOut) {
+                            isAnimatingOut = true
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onSwipeLeft()
                             coroutineScope.launch {
-                                isAnimatingOut = true
-                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                 offset.animateTo(
                                     targetValue = Offset(-screenWidthPx * 1.5f, 0f),
                                     animationSpec = spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessMedium
+                                        dampingRatio = Spring.DampingRatioNoBouncy,
+                                        stiffness = Spring.StiffnessHigh
                                     )
                                 )
-                                onSwipeLeft()
                             }
                         }
                         true
@@ -155,15 +155,17 @@ fun SwipeableCard(
                                     // Haptic feedback for confirmed swipe
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                    // Animate off screen to the right
+                                    // Call callback immediately for instant transition
+                                    onSwipeRight()
+
+                                    // Animate off screen (fire and forget)
                                     offset.animateTo(
                                         targetValue = Offset(screenWidthPx * 1.5f, offset.value.y),
                                         animationSpec = spring(
-                                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                                            stiffness = Spring.StiffnessMedium
+                                            dampingRatio = Spring.DampingRatioNoBouncy,
+                                            stiffness = Spring.StiffnessHigh
                                         )
                                     )
-                                    onSwipeRight()
                                 }
                                 // Swiped left past threshold
                                 horizontalOffset < -swipeThresholdPx -> {
@@ -171,15 +173,17 @@ fun SwipeableCard(
                                     // Haptic feedback for confirmed swipe
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                    // Animate off screen to the left
+                                    // Call callback immediately for instant transition
+                                    onSwipeLeft()
+
+                                    // Animate off screen (fire and forget)
                                     offset.animateTo(
                                         targetValue = Offset(-screenWidthPx * 1.5f, offset.value.y),
                                         animationSpec = spring(
-                                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                                            stiffness = Spring.StiffnessMedium
+                                            dampingRatio = Spring.DampingRatioNoBouncy,
+                                            stiffness = Spring.StiffnessHigh
                                         )
                                     )
-                                    onSwipeLeft()
                                 }
                                 // Threshold not reached - spring back to center
                                 else -> {

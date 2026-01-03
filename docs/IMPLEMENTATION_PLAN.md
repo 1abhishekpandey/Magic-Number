@@ -199,48 +199,24 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 
 **Goal**: Build reusable, well-designed UI components.
 
-### Step 3.1: Create Swipeable Card Component
+### Step 3.1: Create Swipeable Card Component ✅
 
 **What you'll learn**: Gesture detection, animation, state hoisting
 
 **Tasks**:
-- [ ] Create `SwipeableCard.kt` composable
-- [ ] Implement drag gesture with `detectDragGestures`
-- [ ] Calculate rotation based on horizontal offset (±15°)
-- [ ] Implement threshold detection (100dp)
-- [ ] Add spring animation for snap-back
-- [ ] Add fly-off animation when threshold exceeded
-- [ ] Expose `onSwipeLeft` and `onSwipeRight` callbacks
+- [x] Create `SwipeableCard.kt` composable
+- [x] Implement drag gesture with `detectDragGestures`
+- [x] Calculate rotation based on horizontal offset (±15°)
+- [x] Implement threshold detection (100dp)
+- [x] Add spring animation for snap-back
+- [x] Add fly-off animation when threshold exceeded
+- [x] Expose `onSwipeLeft` and `onSwipeRight` callbacks
 
-**Key concepts**:
-```kotlin
-@Composable
-fun SwipeableCard(
-    modifier: Modifier = Modifier,
-    onSwipeLeft: () -> Unit,
-    onSwipeRight: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    var offsetX by remember { mutableFloatStateOf(0f) }
-    val rotation = (offsetX / 20).coerceIn(-15f, 15f)
-
-    Box(
-        modifier = modifier
-            .offset { IntOffset(offsetX.roundToInt(), 0) }
-            .graphicsLayer { rotationZ = rotation }
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragEnd = { /* Check threshold, animate */ },
-                    onDrag = { change, dragAmount ->
-                        offsetX += dragAmount.x
-                    }
-                )
-            }
-    ) {
-        content()
-    }
-}
-```
+**Implementation highlights**:
+- Uses `Animatable<Offset>` for smooth, interruptible animations
+- `graphicsLayer` for efficient rotation transforms
+- Spring physics with `Spring.DampingRatioMediumBouncy`
+- Card follows both X and Y during drag, flies off maintaining Y position
 
 **Best practices to review**:
 - State hoisting pattern
@@ -248,90 +224,84 @@ fun SwipeableCard(
 - Gesture composition
 - Animation APIs (`animate*AsState`, `Animatable`)
 
-**Checkpoint**: Card can be swiped and snaps back or flies off
+**Checkpoint**: ✅ Card can be swiped and snaps back or flies off
 
 ---
 
-### Step 3.2: Add Haptic Feedback
+### Step 3.2: Add Haptic Feedback ✅
 
 **What you'll learn**: System services, haptic patterns, Android vibration API
 
 **Tasks**:
-- [ ] Create `HapticManager.kt` utility
-- [ ] Implement light tick for threshold crossing
-- [ ] Implement medium impact for card release
-- [ ] Implement success pattern for reveal
-- [ ] Integrate haptics into SwipeableCard
+- [x] Implement light tick for threshold crossing (using `LocalHapticFeedback`)
+- [x] Implement medium impact for card release
+- [x] Integrate haptics into SwipeableCard
+
+**Implementation notes**:
+- Used `LocalHapticFeedback` composition local (no separate manager needed)
+- `TextHandleMove` for threshold crossing (light tick)
+- `LongPress` for confirmed swipe (stronger feedback)
+- Tracks threshold state to avoid repeated haptic triggers
 
 **Best practices to review**:
 - Context usage in Compose
 - `LocalHapticFeedback` composition local
 - When to use system haptics vs custom patterns
 
-**Checkpoint**: Feel haptic feedback when swiping cards
+**Checkpoint**: ✅ Haptic feedback integrated into SwipeableCard
 
 ---
 
-### Step 3.3: Create Flip Card Component
+### Step 3.3: Create Flip Card Component ✅
 
 **What you'll learn**: 3D transformations, animation sequencing
 
 **Tasks**:
-- [ ] Create `FlipCard.kt` composable
-- [ ] Implement Y-axis rotation animation (0° → 180°)
-- [ ] Show "back" content when rotation > 90°
-- [ ] Add easing for dramatic effect (slow start, slow end)
-- [ ] Make animation duration configurable (~1.5 seconds)
+- [x] Create `FlipCard.kt` composable
+- [x] Implement Y-axis rotation animation (0° → 180°)
+- [x] Show "back" content when rotation > 90°
+- [x] Add cubic ease-in-out for dramatic effect
+- [x] Animation duration: 1500ms
+- [x] Counter-rotate back content to prevent mirroring
+- [x] Haptic feedback on flip completion
 
-**Key concepts**:
-```kotlin
-@Composable
-fun FlipCard(
-    isFlipped: Boolean,
-    front: @Composable () -> Unit,
-    back: @Composable () -> Unit
-) {
-    val rotation by animateFloatAsState(
-        targetValue = if (isFlipped) 180f else 0f,
-        animationSpec = tween(durationMillis = 1500, easing = EaseInOutCubic)
-    )
-
-    Box(
-        modifier = Modifier.graphicsLayer {
-            rotationY = rotation
-            cameraDistance = 12f * density
-        }
-    ) {
-        if (rotation <= 90f) front() else back()
-    }
-}
-```
+**Implementation highlights**:
+- Uses `Animatable` with custom cubic easing
+- Camera distance = 12f * density for 3D perspective
+- Back content counter-rotated 180° to prevent text mirroring
+- Includes overloaded version without callback
 
 **Best practices to review**:
 - `graphicsLayer` for performant transforms
 - Camera distance for 3D perspective
 - Custom easing functions
 
-**Checkpoint**: Card flips smoothly with 3D effect
+**Checkpoint**: ✅ Card flips smoothly with 3D effect and haptic
 
 ---
 
-### Step 3.4: Create Dots Indicator
+### Step 3.4: Create Dots Indicator ✅
 
 **What you'll learn**: Simple composables, layout, state-driven UI
 
 **Tasks**:
-- [ ] Create `DotsIndicator.kt` composable
-- [ ] Accept `total` and `current` parameters
-- [ ] Style completed dots as gold, remaining as white/dim
-- [ ] Add subtle scale animation for current dot
+- [x] Create `DotsIndicator.kt` composable
+- [x] Accept `total` and `current` parameters
+- [x] Style completed dots as gold (primary), remaining as dim white
+- [x] Add spring animation for current dot size (8dp → 12dp)
+
+**Implementation highlights**:
+- Uses `Row` with `Arrangement.spacedBy` for clean spacing
+- `animateDpAsState` with spring for smooth size transition
+- Extracted `Dot` private composable for reusability
+- Uses MaterialTheme colors for consistency
 
 **Best practices to review**:
 - Composable function naming conventions
 - Modifier chaining order
 - Accessibility considerations
 
-**Checkpoint**: Dots indicator shows progress correctly
+**Checkpoint**: ✅ Dots indicator shows progress with animation
 
 ---
 

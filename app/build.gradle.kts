@@ -6,13 +6,11 @@ plugins {
 
 android {
     namespace = "com.abhishek.magicnumber"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.abhishek.magicnumber"
-        minSdk = 25
+        minSdk = 29
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -47,6 +45,16 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.animation)
+
+    // ViewModel for MVVM architecture
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // Navigation for screen transitions
+    implementation(libs.androidx.navigation.compose)
+
+    // DataStore for persisting settings
+    implementation(libs.androidx.datastore.preferences)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

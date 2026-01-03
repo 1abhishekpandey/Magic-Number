@@ -130,109 +130,60 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 
 ---
 
-## Phase 2: Data Layer
+## Phase 2: Data Layer ✅
 
 **Goal**: Build the foundation for data persistence and business logic.
 
-### Step 2.1: Create Domain Models
+> **Note**: Phase 2 was completed during Phase 1.3 (Package Structure) to provide working placeholders.
+
+### Step 2.1: Create Domain Models ✅
 
 **What you'll learn**: Kotlin data classes, sealed classes, immutability
 
 **Tasks**:
-- [ ] Create `Card.kt`:
-  ```kotlin
-  data class Card(
-      val keyNumber: Int,
-      val numbers: List<Int>,
-      val bitPosition: Int
-  )
-  ```
-- [ ] Create `GameState.kt`:
-  ```kotlin
-  data class GameState(
-      val cards: List<Card>,
-      val currentCardIndex: Int,
-      val responses: List<Boolean>,
-      val phase: GamePhase
-  )
-
-  sealed class GamePhase {
-      object NotStarted : GamePhase()
-      object InProgress : GamePhase()
-      data class Revealing(val number: Int) : GamePhase()
-      data class Complete(val number: Int) : GamePhase()
-  }
-  ```
-- [ ] Create `NumberLayout.kt` enum
-- [ ] Create `Settings.kt` data class
+- [x] Create `Card.kt` - Represents a single card with keyNumber, numbers list, bitPosition
+- [x] Create `GameState.kt` - Game state with GamePhase sealed class
+- [x] Create `Settings.kt` - Settings data class with NumberLayout enum
 
 **Best practices to review**:
 - Sealed classes vs enums for state
 - Why immutable data classes?
 - Default parameter values
 
-**Checkpoint**: Models compile with no warnings
+**Checkpoint**: ✅ Models compile with no warnings
 
 ---
 
-### Step 2.2: Implement Card Generator
+### Step 2.2: Implement Card Generator ✅
 
 **What you'll learn**: Bit manipulation, pure functions, algorithm implementation
 
 **Tasks**:
-- [ ] Create `CardGenerator.kt` in data package
-- [ ] Implement `generateCards(maxNumber: Int): List<Card>`
-  - Calculate number of bits needed: `log2(maxNumber + 1)`
-  - For each bit position, create a card with all numbers having that bit set
-- [ ] Implement `calculateResult(responses: List<Boolean>, cards: List<Card>): Int`
-  - Sum key numbers where response is true
-- [ ] Write unit tests for card generation
-
-**Algorithm deep-dive**:
-```kotlin
-// For maxNumber = 63, we need 6 cards (bits 0-5)
-// Card for bit 0 (keyNumber = 1): contains 1, 3, 5, 7, 9... (odd numbers)
-// Card for bit 1 (keyNumber = 2): contains 2, 3, 6, 7, 10, 11...
-// etc.
-
-fun generateCards(maxNumber: Int): List<Card> {
-    val numBits = (maxNumber + 1).toDouble().let {
-        kotlin.math.log2(it).toInt()
-    }
-    return (0 until numBits).map { bitPosition ->
-        val keyNumber = 1 shl bitPosition
-        val numbers = (1..maxNumber).filter { (it and keyNumber) != 0 }
-        Card(keyNumber, numbers, bitPosition)
-    }
-}
-```
+- [x] Create `CardGenerator.kt` in data package (object, not class)
+- [x] Implement `generateCards(maxNumber: Int): List<Card>`
+- [x] Implement `calculateResult(responses: List<Boolean>, cards: List<Card>): Int`
+- [ ] Write unit tests for card generation (deferred to Phase 6)
 
 **Best practices to review**:
 - Pure functions (no side effects)
 - Bit manipulation operators (`shl`, `and`)
 - Why put business logic in separate class vs ViewModel?
 
-**Checkpoint**: Unit tests pass for card generation
+**Checkpoint**: ✅ CardGenerator implemented
 
 ---
 
-### Step 2.3: Implement DataStore Repository
+### Step 2.3: Implement DataStore Repository ✅
 
 **What you'll learn**: DataStore Preferences, Kotlin Flow, Repository pattern
 
 **Tasks**:
-- [ ] Create `PreferencesRepository.kt`
-- [ ] Define preference keys:
-  ```kotlin
-  private object PreferencesKeys {
-      val MAX_NUMBER = intPreferencesKey("max_number")
-      val NUMBER_LAYOUT = stringPreferencesKey("number_layout")
-  }
-  ```
-- [ ] Implement `settingsFlow: Flow<Settings>` to observe settings
-- [ ] Implement `suspend fun updateMaxNumber(value: Int)`
-- [ ] Implement `suspend fun updateNumberLayout(layout: NumberLayout)`
-- [ ] Handle default values gracefully
+- [x] Create `PreferencesRepository.kt`
+- [x] Define preference keys (MAX_NUMBER, NUMBER_LAYOUT)
+- [x] Implement `settingsFlow: Flow<Settings>` to observe settings
+- [x] Implement `suspend fun updateMaxNumber(value: Int)`
+- [x] Implement `suspend fun updateNumberLayout(layout: NumberLayout)`
+- [x] Handle default values (63, ASCENDING)
 
 **Best practices to review**:
 - Why DataStore over SharedPreferences?
@@ -240,7 +191,7 @@ fun generateCards(maxNumber: Int): List<Card> {
 - Repository pattern benefits
 - Handling IO operations on correct dispatcher
 
-**Checkpoint**: Can read/write preferences (test via ViewModel)
+**Checkpoint**: ✅ PreferencesRepository implemented
 
 ---
 

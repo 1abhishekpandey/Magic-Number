@@ -70,7 +70,6 @@ import com.abhishek.magicnumber.ui.theme.Gold
 import com.abhishek.magicnumber.ui.theme.Purple700
 import com.abhishek.magicnumber.ui.theme.Purple800
 import com.abhishek.magicnumber.ui.theme.Purple900
-import com.abhishek.magicnumber.ui.components.VoiceCommandFeedback
 import com.abhishek.magicnumber.ui.components.VoiceControlButton
 import com.abhishek.magicnumber.viewmodel.GameViewModel
 import com.abhishek.magicnumber.voice.VoiceRecognitionState
@@ -292,30 +291,28 @@ private fun GameInProgressContent(
                 }
             }
 
-            // Voice command feedback overlay
-            if (lastRecognizedCommand != null) {
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier.align(Alignment.TopCenter)
-                ) {
-                    VoiceCommandFeedback(
-                        command = lastRecognizedCommand,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
-                }
-            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Swipe hints
-        Text(
-            text = "← NO          YES →",
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-            fontSize = 14.sp
-        )
+        // Swipe hints - highlight recognized command
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(32.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "← NO",
+                color = if (lastRecognizedCommand == "No") Gold else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                fontSize = 14.sp,
+                fontWeight = if (lastRecognizedCommand == "No") FontWeight.Bold else FontWeight.Normal
+            )
+            Text(
+                text = "YES →",
+                color = if (lastRecognizedCommand == "Yes") Gold else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                fontSize = 14.sp,
+                fontWeight = if (lastRecognizedCommand == "Yes") FontWeight.Bold else FontWeight.Normal
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

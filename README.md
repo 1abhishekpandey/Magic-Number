@@ -33,6 +33,16 @@ This app uses a classic mathematical magic trick based on binary numbers. Each c
 
 - Android 10 or higher
 
+## Screenshots
+
+<img width="461" height="730" alt="image" src="https://github.com/user-attachments/assets/56911988-8a06-4866-a6f2-3fdd4121fbeb" />
+
+<img width="461" height="922" alt="image" src="https://github.com/user-attachments/assets/8fa58d42-b032-4208-8769-67371c73c516" />
+
+<img width="462" height="879" alt="image" src="https://github.com/user-attachments/assets/83473dc0-8801-4e26-a54a-b658c5d857d3" />
+
+<img width="461" height="910" alt="image" src="https://github.com/user-attachments/assets/5cba8b80-6e48-4e08-8b40-6b4e9019d6a5" />
+
 ---
 
 *Think of a number. I'll read your mind.*

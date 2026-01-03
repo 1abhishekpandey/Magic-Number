@@ -69,6 +69,7 @@ class GameViewModel(
 
         _uiState.value = if (nextIndex >= current.cards.size) {
             // All cards shown, calculate and show calculating animation
+            stopVoiceControl()  // Stop listening when game ends
             val result = CardGenerator.calculateResult(newResponses, current.cards)
             current.copy(
                 responses = newResponses,
